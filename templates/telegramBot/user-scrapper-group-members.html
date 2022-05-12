@@ -1,0 +1,159 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+
+<link rel="stylesheet" href="/static/telegramBot/css/telegram-dmBot-send.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  margin: auto;
+  animation: spin 2s linear infinite;
+  border-top: 16px solid blue;
+  border-right: 16px solid green;
+  border-bottom: 16px solid red;
+  border-left: 16px solid pink;
+}
+#loader{
+  
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+{% block heading %} 
+Users Scrapper <button id="groupBtn" class="mx-2 btn btn-outline-success">Add a new member</button>
+{% endblock %}
+{% block content %}
+<!-- The add new member modal -->
+<div id="groupModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close1">&times;</span>
+    <div class="">
+      <form action="/telegramBot/add-manual-member/{{user_data.0.id}}/{{account_id}}/{{group_id}}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="exampleInputEmail1">Member Name:</label>
+          <input type="text" class="form-control" name="member_name" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <input hidden type="text" class="form-control" name="account_id" id="exampleInputEmail2" aria-describedby="emailHelp" value="{{account.0.id}}">
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+    <div class="groups">
+    </div>
+  </div>
+
+</div>
+<!-- member modal end -->
+{% if results %}
+<div class="container">
+  {% if results == "0" %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>No</strong>  new users found!
+    {% else %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>{{results}}</strong>  new users scrapped!
+    {% endif %}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  {% endif %}
+
+<div class="table-responsive">      
+    <h2 class="text-center">Group Members</h2>
+    <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+        <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Group ID</th>
+              <!-- <th scope="col">Member ID</th> -->
+              <th scope="col">Member Name</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in telegram_scrapped_members %}
+            <tr>
+              <th scope="row">{{forloop.counter}}</th>
+              <td>{{group_id}}</td>
+              <!-- <td>{{i.member_id}}</td> -->
+              <td>{{i.member_name}}</td>
+              {% if i.status == "scheduled" %}
+              <td><button class="btn-sm btn-success">Scheduled.......</button></td>
+              {% else %}
+              <td><button class="btn-sm btn-dark">Not Scheduled</button></td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+    </table>
+</div>
+    <form action="/telegramBot/users-scrapper-group-members/{{account_id}}/{{group_id}}" class="text-center mb-4 mt-2" method="post">
+        {% csrf_token %}
+        <input type="text" hidden>
+        <button id="loaderbtn" type="submit" class="btn btn-outline-success ">Scrap/Update Members</button>
+        <a onclick="deleteAlert()" href="/telegramBot/clear-delete-all-members/{{account_id}}/{{group_id}}"class="btn btn-outline-danger ">Clear/Delete All Members</class=></a>
+    </form>
+</div>
+  <div id="loader" class="loader"></div>
+{% endblock %}
+{% block scripts %} 
+<script>
+  function myScript(){
+   console.log("cliccked");
+   var x = document.getElementById("loader");
+    x.style.display = 'block';
+  }
+ document.getElementById("loaderbtn").addEventListener("click", myScript);
+ 
+</script>
+
+<script>
+  function deleteAlert() {
+    alert("Are you sure you want to clear all scrapped members from this group?");
+  }
+</script>
+<script>
+   $(document).ready(function() {
+    $('#example1').DataTable();
+} );
+</script>
+<script>
+  // Get the modal
+    var modal1 = document.getElementById("groupModal");
+    // Get the button that opens the modal
+    var btn1 = document.getElementById("groupBtn");
+    // Get the <span> element that closes the modal
+    var span1 = document.getElementsByClassName("close1")[0];
+    // When the user clicks on the button, open the modal
+    btn1.onclick = function() {
+        modal1.style.display = "block";
+    }
+    // When the user clicks on <span> (x), close the modal
+    span1.onclick = function() {
+        modal1.style.display = "none";
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal1) {
+        modal1.style.display = "none";
+        }
+    }
+  </script>
+{% endblock %}

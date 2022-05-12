@@ -1,0 +1,193 @@
+{% extends 'scrapper/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 50%; /* Full width */
+  height: 50%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 10px auto; /* 15% from the top and centered */
+  padding: 80px;
+  border: 1px solid #888;
+  width: 100%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+{% endblock %}
+{% block heading %} 
+Filtered Data with numbers <span><a href="/scrapper/select-scrapped-data/with-numbers/{{user_data.0.id}}"><button type="button" class="btn btn-outline-primary ">Select data</button></a></span><span><a><button  id="myBtn" type="button" class="btn btn-outline-dark mx-4 ">Filter</button></a></span>
+{% endblock %}
+{% block content %} 
+<!-- filer modal start  -->
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="">
+      <form action="/scrapper/scrapper-filter/with-numbers/{{user_data.0.id}}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="exampleInputEmail1">Price Min</label>
+          <input type="number" class="form-control" name="price-min" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Price Max</label>
+          <input type="number" class="form-control" name="price-max" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Kilometers Min</label>
+          <input type="number" class="form-control" name="km-min" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Kilometers Max</label>
+          <input type="number" class="form-control" name="km-max" id="exampleInputEmail1" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" class="btn btn-primary">Apply</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+<!-- filer modal end -->
+
+
+<div class="table-responsive">      
+    <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+        <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">links</th>
+              <th scope="col">Name</th>
+              <th scope="col">Price</th>
+              <th scope="col">Kilometers</th>
+              <th scope="col">Date</th>
+              <th scope="col">Power</th>
+              <th scope="col">Image</th>
+              <th scope="col">Number</th>
+              <th scope="col">Send via number</th>
+              <th scope="col">Send via web</th>
+              <th scope="col">Edit</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in data %}
+            <tr>
+              <th scope="row">{{forloop.counter}}</th>
+              <td><a target="blank" href="{{i.links}}">{{i.links}}</a></td>
+              <td>{{i.Name}}</td>
+              <td>€ {{i.Price}}</td>
+              <td>{{i.Kilometers}}</td>
+              <td>{{i.Date}}</td>
+              <td>{{i.Power}}</td>
+              <td><a target="blank" href="{{i.Image}}">{{i.Image}}</a></td>
+              <td>{{i.Number}}</td>
+              <td><a href="/scrapper/scrapper-bot-send-via-number-single/{{i.Number}}"><button  data-bs-toggle="modal" data-bs-target="#sendvianumberModal" type="button" class="btn btn-outline-primary btn-sm">Send_via_number</button></a></td>
+              <!-- <td><a href="scrapper-bot-send-via-web-single/with-numbers/{{i.id}}"><button  type="button" class="btn btn-outline-info btn-sm">Send_via_web</button></a></td> -->
+              <td><a href="/scrapper/message-scrapper-bot-send-via-web-single/with-numbers/{{i.id}}"><button  type="button" class="btn btn-outline-info btn-sm">Send_via_web</button></a></td>
+              <td><a href="/scrapper/edit-data/with-numbers/{{i.id}}"><button type="button" class="btn btn-outline-secondary btn-sm">Edit</button></a></td>
+              <!-- <td><a href="#" class="button button-3d button-mini button-rounded button-red">Delete</a></td> -->
+              <td><a href="/scrapper/delete-data/with-numbers/{{i.id}}"><button onclick="deleteAlert()" type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block scripts %} 
+<!-- DataTables  & Plugins -->
+<script src="/static/adminlte/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+
+<script src="/static/adminlte/plugins/jszip/jszip.min.js"></script>
+<script src="/static/adminlte/plugins/pdfmake/pdfmake.min.js"></script>
+<script src="/static/adminlte/plugins/pdfmake/vfs_fonts.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<!-- Page specific script -->
+<script>
+    $(function () {
+      $("#example1").DataTable({
+      //   "responsive": true,
+        // dom: 'Bfrtip',
+        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+      }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+      });
+    });
+  </script>
+  <script>
+    function deleteAlert() {
+      alert("Are you sure you want to delete that row?");
+    }
+  </script>
+  <script>
+    // Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on the button, open the modal
+btn.onclick = function() {
+  modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+  </script>
+{% endblock %}

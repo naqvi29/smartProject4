@@ -1,0 +1,112 @@
+{% extends 'home/admin-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+</style>
+{% endblock %}
+{% block heading %} 
+User Accounts
+{% endblock %}
+{% block content %} 
+<a href="/signup"><button class="btn btn-outline-success my-2">Create a new user account</button></a>
+<div class="table-responsive">      
+    <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+        <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Username</th>
+              <th scope="col">Email</th>
+              <th scope="col">Password</th>
+              <th scope="col">Profile-pics</th>
+              <th scope="col">users scrapper</th>
+              <th scope="col">dm to group</th>
+              <th scope="col">dm to user</th>
+              <th scope="col">add users to group</th>
+              <th scope="col">autoscout scrap</th>
+              <th scope="col">Edit</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in users_data %}
+            <tr>
+              <th scope="row">{{forloop.counter}}</th>
+              <td>{{i.username}}</td>
+              <td>{{i.email}}</td>
+              <td>{{i.password}}</td>
+              <td><a target="blank" href="/static/images/profile-pics/{{i.profile_pic}}">{{i.profile_pic}}</a></td>
+              {% if i.users_scrapper == 'True' %}
+              <td><button class="btn btn-sm btn-success">Allowed</button>
+              {% else %}
+              <td><button class="btn btn-sm btn-secondary">Restricted</button>
+                {% endif %}
+                {% if i.dm_to_group == 'True' %}
+              <td><button class="btn btn-sm btn-success">Allowed</button>
+              {% else %}
+              <td><button class="btn btn-sm btn-secondary">Restricted</button>
+                {% endif %}
+                {% if i.dm_to_user == 'True' %}
+              <td><button class="btn btn-sm btn-success">Allowed</button>
+              {% else %}
+              <td><button class="btn btn-sm btn-secondary">Restricted</button>
+                {% endif %} 
+                {% if i.add_users_to_group == 'True' %}
+              <td><button class="btn btn-sm btn-success">Allowed</button>
+              {% else %}
+              <td><button class="btn btn-sm btn-secondary">Restricted</button>
+                {% endif %}
+                {% if i.autoscout_scrap == 'True' %}
+              <td><button class="btn btn-sm btn-success">Allowed</button>
+              {% else %}
+              <td><button class="btn btn-sm btn-secondary">Restricted</button>
+                {% endif %}
+              <td><a href="/edit-user/{{i.id}}"><button  type="button" class="btn btn-outline-secondary btn-sm">Edit</button></a></td>
+              <td><a href="/delete-user/{{i.id}}"><button onclick="deleteAlert()" type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block scripts %} 
+<!-- DataTables  & Plugins -->
+<script src="/static/adminlte/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+
+<script src="/static/adminlte/plugins/jszip/jszip.min.js"></script>
+<script src="/static/adminlte/plugins/pdfmake/pdfmake.min.js"></script>
+<script src="/static/adminlte/plugins/pdfmake/vfs_fonts.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<!-- Page specific script -->
+<script>
+    $(function () {
+      $("#example1").DataTable({
+      //   "responsive": true,
+        // dom: 'Bfrtip',
+        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+      }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+      });
+    });
+  </script>
+  <script>
+    function deleteAlert() {
+      alert("Are you sure you want to delete that user?");
+    }
+  </script>
+{% endblock %}

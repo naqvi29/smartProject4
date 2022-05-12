@@ -1,0 +1,71 @@
+{% extends 'scrapper/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+  
+}
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  border-top: 16px solid blue;
+  border-right: 16px solid green;
+  border-bottom: 16px solid red;
+  border-left: 16px solid pink;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+{% block heading %}
+Send Message
+{% endblock %}
+{% block content %} 
+<div class="container">
+    <form action="/scrapper/scrapper-bot-send-via-web-single/{{type}}/{{id}}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="exampleInputEmail1">To URL</label>
+          <input type="text" class="form-control" name="url" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{url}}" disabled placeholder="Enter email">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Message</label>
+          <input type="text" class="form-control" name="message" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Name</label>
+          <input type="text" class="form-control" name="name" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Email</label>
+          <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputPassword1">Number</label>
+          <input type="text" name="number" class="form-control" id="exampleInputPassword1" placeholder="+92 xxxxxxxxxx" required>
+        </div>
+        <button type="submit" onclick="sending()" class="btn btn-primary">Send</button>
+      </form>
+      <div style="display: block;" id="loader;" class="sending mt-2">
+        <p>Please wait after sending...</p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+
+<script>
+    function sending() {
+        var a = document.getElementsByClassName("sending");
+        a.style.display = 'none';
+        console.log(a)
+}
+</script>
+
+{% endblock %}

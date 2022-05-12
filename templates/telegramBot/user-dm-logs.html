@@ -1,0 +1,72 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+<style>
+    #example {
+  font-size: 0.8em;
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+{% block heading %} 
+User DM Logs <a href="/telegramBot/clear-all-user-dm-logs"><button onclick="deleteAlert()" class="ml-5 btn-sm btn btn-outline-danger">Clear All Logs</button></a>
+{% endblock %}
+{% block content %}
+<div>
+    <div class="table-responsive">      
+        <table id="example" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+            <thead>
+                <tr>
+                  <th scope="col">Log</th>
+                  <th scope="col">Message</th>
+                  <th scope="col">Image</th>
+                  <th scope="col">Sent To</th>
+                  <th scope="col">Sent From</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in logs %}
+                <tr>
+                  <td>{{i.log}}</td>
+                  <td>{{i.message}}</td>
+                  <td>{{i.image}}</td>
+                  <td>{{i.member_name}}</td>
+                  <td>{{i.account}}</td>
+                  <td>{{i.type}}</td>
+                  <td>{{i.date}}</td>
+                  <td>{{i.time}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+      </div>
+</div>
+{% endblock %}
+{% block scripts %} 
+<script>
+   $(document).ready(function() {
+    $('#example').DataTable();
+} );
+</script>
+<script>
+function deleteAlert() {
+  alert("Are you sure you want to delete all logs?");
+}
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

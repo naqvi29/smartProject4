@@ -1,0 +1,104 @@
+{% extends 'home/admin-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+</style>
+{% endblock %}
+{% block heading %} 
+Create a new user Account
+{% endblock %}
+{% block content %} 
+<div class="container-fluid">
+  <form id="signup-form" name="signup-form" class="mb-0" action="/edit-user/{{user_data.0.id}}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="row">
+  <div class="col-12 form-group">
+  <label for="login-form-username">Username:</label>
+  <input type="text" id="login-form-username" name="username" value="{{user_data.0.username}}" class="form-control not-dark">
+  </div>
+  <div class="col-12 form-group">
+  <label for="login-form-username">Email::</label>
+  <input type="email" id="login-form-username" name="email" value="{{user_data.0.email}}" class="form-control not-dark">
+  </div>
+  <div class="col-12 form-group">
+  <label for="login-form-username">Profile Picture::</label>
+  <input type="file" id="login-form-username" name="profile_pic" value="{{user_data.0.profile_pic}}" class="form-control ">
+  </div>
+  <div class="col-12 form-group">
+  <label for="login-form-password">Password:</label>
+  <input type="text" id="login-form-password" name="password" value="{{user_data.0.password}}" class="form-control not-dark">
+  </div>
+  <div class="col-12 form-group">
+  <label for="login-form-password">Rights:</label>
+
+  <div class="form-check form-check-inline mx-4">
+    <input class="form-check-input" type="checkbox" name="users-scrapper" id="inlineCheckbox1" value="checked">
+    <label class="form-check-label" for="inlineCheckbox1">Users Scrapper</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" name="dm-to-group" id="inlineCheckbox2" value="checked">
+    <label class="form-check-label" for="inlineCheckbox2">Dm to group</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" name="dm-to-user" id="inlineCheckbox1" value="checked">
+    <label class="form-check-label" for="inlineCheckbox1">Dm to user</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" name="add-users-to-group" id="inlineCheckbox2" value="checked">
+    <label class="form-check-label" for="inlineCheckbox2">Add users to group</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" name="autoscout-scrap" id="inlineCheckbox2" value="checked">
+    <label class="form-check-label" for="inlineCheckbox2">Autoscout Scrap</label>
+  </div>
+
+  </div>
+  <div class="col-12 form-group mb-0">
+  <button class="btn btn-outline-success" id="login-form-submit" name="signup-form-submit">Update</button>
+  </div>
+  </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %} 
+<!-- DataTables  & Plugins -->
+<script src="/static/adminlte/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+
+<script src="/static/adminlte/plugins/jszip/jszip.min.js"></script>
+<script src="/static/adminlte/plugins/pdfmake/pdfmake.min.js"></script>
+<script src="/static/adminlte/plugins/pdfmake/vfs_fonts.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="/static/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<!-- Page specific script -->
+<script>
+    $(function () {
+      $("#example1").DataTable({
+      //   "responsive": true,
+        // dom: 'Bfrtip',
+        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+      }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+      });
+    });
+  </script>
+  <script>
+    function deleteAlert() {
+      alert("Are you sure you want to delete that user?");
+    }
+  </script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+{% endblock %}
+{% block heading %} 
+Schedule Messages
+{% endblock %}
+{% block content %}
+<div>
+    <div class="table-responsive">      
+        <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+            <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Message</th>
+                  <th scope="col">Image</th>
+                  <th scope="col">Accound_ID</th>
+                  <th scope="col">Group</th>
+                  <th scope="col">Delay</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Time</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in messages %}
+                <tr>
+                  <th scope="row">{{forloop.counter}}</th>
+                  <td>{{i.type}}</td>
+                  <td>{{i.message}}</td>
+                  <td>{{i.image}}</td>
+                  <td>{{i.account_id}}</td>
+                  <td>{{i.group}}</td>
+                  <td>{{i.delay}}</td>
+                  <td>{{i.date}}</td>
+                  <td>{{i.time}}</td>
+                  {% if i.status == "completed" %}
+                  <td><button class="btn btn-sm btn-success">Delivered</button></td>
+                  {% else %}
+                  <td><button class="btn btn-sm btn-secondary">Pending</button></td>
+                  {% endif %}
+                  <td><a href="/telegramBot/delete-schedule-messages/{{i.id}}"><button onclick="deleteAlert()" type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+      </div>
+</div>
+{% endblock %}
+{% block scripts %} 
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

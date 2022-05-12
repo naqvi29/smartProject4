@@ -1,0 +1,147 @@
+{% extends 'scrapper/user-layout.html' %}
+{% block head %}
+<style>
+	#example1 {
+		font-size: 0.8em;
+	}
+</style>
+<style>
+	table.datatable {
+		width: 100%;
+		border: none;
+		background: #fff;
+	}
+
+	table.datatable td.table_foot {
+		border: none;
+		background: #fff;
+		text-align: center;
+	}
+
+	table.datatable tr.odd_col {
+		background: none;
+	}
+
+	table.datatable tr.even_col {
+		background: #ddd;
+	}
+
+	table.datatable td {
+		font-size: 10pt;
+		padding: 5px 10px;
+		border-bottom: 1px solid #ddd;
+		text-align: left;
+	}
+
+	table.datatable th {
+		text-align: left;
+		font-size: 8pt;
+		padding: 10px 10px 7px;
+		text-transform: uppercase;
+		color: #fff;
+		background-color: black;
+		font-family: sans-serif;
+	}
+</style>
+<script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+<script src="app.js"></script>
+{% endblock %}
+{% block heading %}
+Select Scrapped Data<div class="my-2">
+	{% if type == 'withnumbers' %}
+	<button onclick="send()" class="btn btn-outline-primary btn-sm">Send_via_number</button>
+	{% endif %}
+	<button onclick="send()" class="btn btn-outline-info btn-sm">Send_via_web</button>
+</div>
+{% endblock %}
+{% block content %}
+<div>
+	<div id="body">
+		<table class="datatable">
+			<thead>
+				<tr>
+					<th><input id="check_all" type="checkbox"></th>
+					<th>ID</th>
+					<th>Links</th>
+					<th>Name</th>
+					<th>Price</th>
+					<th>Kilometers</th>
+					<th>Date</th>
+					<th>Power</th>
+					<th>Image</th>
+					{% if type == 'withnumbers' %}
+					<th>Number</th>
+					{% endif %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for i in data %}
+				<tr class="odd_col">
+					<td><input type="checkbox" name="row-check" value="{{i.id}}"></td>
+					<td scope="row">{{forloop.counter}}</td>
+					<td><a target="blank" href="{{i.links}}">{{i.links}}</a></td>
+					<td>{{i.Name}}</td>
+					<td>{{i.Price}}</td>
+					<td>{{i.Kilometers}}</td>
+					<td>{{i.Date}}</td>
+					<td>{{i.Power}}</td>
+					<td><a target="blank" href="{{i.Image}}">{{i.Image}}</a></td>
+					{% if type == 'withnumbers' %}
+					<td>{{i.Number}}</td>
+					{% endif %}
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+	$(function () {
+		//If check_all checked then check all table rows
+		$("#check_all").on("click", function () {
+			if ($("input:checkbox").prop("checked")) {
+				$("input:checkbox[name='row-check']").prop("checked", true);
+			} else {
+				$("input:checkbox[name='row-check']").prop("checked", false);
+			}
+		});
+
+		// Check each table row checkbox
+		$("input:checkbox[name='row-check']").on("change", function () {
+			var total_check_boxes = $("input:checkbox[name='row-check']").length;
+			var total_checked_boxes = $("input:checkbox[name='row-check']:checked").length;
+
+			// If all checked manually then check check_all checkbox
+			if (total_check_boxes === total_checked_boxes) {
+				$("#check_all").prop("checked", true);
+			}
+			else {
+				$("#check_all").prop("checked", false);
+			}
+		});
+	});
+
+
+	function send() {
+		var values = $("input[name='row-check']:checked")
+			.map(function () { return $(this).val(); }).get();
+		console.log(values)
+		var json_string = JSON.stringify(values)
+		$.ajax({
+			//   url: "/select-scrapped-data/with-numbers/4",
+			url: "/scrapper/scrapper-bot-send-via-number-multiple",
+			type: "POST",
+			data: {
+				"myData": json_string,
+				csrfmiddlewaretoken: '{{ csrf_token }}'
+			}
+		}).done(function (data) {
+			console.log(data);
+			window.location.href = "/scrapper/messages-sent"
+		});
+	}
+</script>
+{% endblock %}

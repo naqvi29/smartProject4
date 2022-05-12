@@ -1,0 +1,433 @@
+{% extends 'telegramBot/user-layout.html' %}
+
+{% block head %}
+<!-- my custom css file  -->
+<link rel="stylesheet" href="/static/telegramBot/css/telegram-dmBot-send.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+{% endblock %}
+
+{% block heading %} 
+Telegram DM BOT send {{category.capitalize}}  <button id="groupBtn" class="ml-4 btn btn-outline-dark">Manage Groups</button><a href="/telegramBot/schedule-messages"><button class="ml-2 btn btn-outline-dark">Schedule Messages</button></a>
+{% endblock %}
+
+{% block content %}
+<!-- The add new group modal -->
+<div id="groupModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close1">&times;</span>
+    <div class="">
+      <form action="/telegramBot/telegram-bot-add-group" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="exampleInputEmail1">Group Name:</label>
+          <input type="text" class="form-control" name="group_name" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <input hidden type="text" class="form-control" name="account_id" id="exampleInputEmail2" aria-describedby="emailHelp" value="{{account.0.id}}">
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+    <div class="groups">
+      
+<div class="table-responsive">      
+  <h2>Groups</h2>
+  <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+      <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Group Name</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in groups %}
+          <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td>{{i.group_name}}</td>
+            <td><a href="/telegramBot/delete-telegram-groups/{{i.id}}"><button onclick="deleteAlert()" type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+  </table>
+</div>
+    </div>
+  </div>
+
+</div>
+<!-- group modal end -->
+
+
+<div class="table-responsive">   
+  <table id="example1" class="display compact table table-bordered table-striped" style="width: 150%;">
+      <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Type</th>
+            <th scope="col">Message</th>
+            <th scope="col">Image</th>
+            <th scope="col">Account</th>
+            <th scope="col">Group</th>
+            <th scope="col">Delay (sec)</th>
+            <th scope="col">DateTime (GMT+5)</th>
+            <th scope="col">Status</th>
+            <th scope="col">Send</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <th scope="row">1</th>
+            <td style="width: 8%;"><select onchange="changeFunc(i=1);" id="type1" type="text" class="form-control" name="type" aria-describedby="emailHelp" placeholder="Select account" required>
+              <option  value="text">Text</option>
+              <option value="image">Image</option>
+              <option value="both">Text + Image</option>
+          </select></td>
+            <td><div id="chatdiv1"><input type="text" class="form-control" name="chat" id="chat1" aria-describedby="emailHelp"></div></td>
+            <td><div id="imagediv1"></div></td>
+            <td><select id="account1" type="text" class="form-control" name="account" aria-describedby="emailHelp" placeholder="Select account" required>
+              {% for i in accounts %}
+              <option value="{{i.id}}">{{i.number}}</option>
+              {% endfor %}
+          </select></td>
+            <td><select id="group_name1" type="text" class="form-control" name="group_name" aria-describedby="emailHelp" placeholder="Enter Group Name" required>
+              {% for i in groups %}
+              <option value="{{i.group_name}}">{{i.group_name}}</option>
+              {% endfor %}
+          </select></td>
+          <td style="width: 15%;"><select id="delay1" type="number" class="form-control w-50" name="sleep_time_first" aria-describedby="emailHelp"  required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="1000">1000</option>
+            <option value="5000">5000</option>
+            <option value="10000">10000</option>
+            <option value="20000">20000</option>
+        </select></td>
+        <td><input type="datetime-local" id="birthdaytime1" class="form-control" name="datetime"></td>
+        <td><button style="display: none;" id="response-btn1" class=""></button></td>
+            <td><button id="response1" class="btn btn-dark" onclick="send(i=1)">Send</button></td>
+            <td><button  onclick="nodelete()"class="btn btn-danger">x</button></td>
+          </tr>
+        </tbody>
+  </table>
+  <div id="add-more">
+    <button onclick="addmore(i=2)" class="btn btn-success btn-sm">+</button></div>
+</div>
+{% endblock %}
+{% block scripts %} 
+
+<script>
+
+    // Get the modal
+    var modal1 = document.getElementById("groupModal");
+    // Get the button that opens the modal
+    var btn1 = document.getElementById("groupBtn");
+    // Get the <span> element that closes the modal
+    var span1 = document.getElementsByClassName("close1")[0];
+    // When the user clicks on the button, open the modal
+    btn1.onclick = function() {
+        modal1.style.display = "block";
+    }
+    // When the user clicks on <span> (x), close the modal
+    span1.onclick = function() {
+        modal1.style.display = "none";
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal1) {
+        modal1.style.display = "none";
+        }
+    }
+    // -x-x-x-x-x-x-x-x-
+
+    function changeFunc(i){
+        var z = document.getElementById("type"+i);
+        var z = z.value;
+        var chatdiv = document.getElementById("chatdiv"+i);
+        var imagediv = document.getElementById("imagediv"+i);
+        if (z == "text"){
+          chatdiv.innerHTML = `<input type="text" class="form-control" name="chat" id="chat`+i+`" aria-describedby="emailHelp">`;
+          imagediv.innerHTML = ``;
+        }
+        else if(z=="image"){
+          imagediv.innerHTML = `<form class="form-control" enctype="multipart/form-data" id="fileform">{%csrf_token%}<input class="form-group" type="file" name="image" id="image`+i+`" aria-describedby="emailHelp"></form>`;
+          chatdiv.innerHTML = ``;
+        }
+        else if(z=="both"){
+          imagediv.innerHTML = `<form class="form-control" enctype="multipart/form-data" id="fileform">{%csrf_token%}<input style="width: 100%;" class="form-group" type="file" name="image" id="image`+i+`" aria-describedby="emailHelp"></form>`;
+          chatdiv.innerHTML = `<input type="text" class="form-control" name="chat" id="chat`+i+`" aria-describedby="emailHelp">`;
+        }
+      }
+       // -x-x-x-x-x-x-x-x-
+
+    function send(i){
+        response_btn = document.getElementById("response-btn"+i);
+        response_btn.className = "btn btn-lg btn-secondary";
+        response_btn.innerText = "Running";
+        response_btn.style.display = "block";
+  
+        
+        var group_name = document.getElementById("group_name"+i);
+        var group_name_value = group_name.value;
+        var account_id = document.getElementById("account"+i)
+        var account_id_value = account_id.value;
+        delay = document.getElementById("delay"+i).value;
+        datetime = document.getElementById("birthdaytime"+i).value;
+        console.log(group_name_value);
+        console.log(delay);
+        console.log(account_id_value);
+        console.log(datetime);
+        if (datetime && group_name_value && delay && account_id_value ) {
+          console.log("all recieved");
+          
+            var z = document.getElementById("type"+i);
+            var z = z.value;
+            var td = document.getElementById("inputType"+i);
+            console.log(td)
+            if (z == "text"){
+              message = document.getElementById("chat"+i).value;
+              var type = "text";
+              // ajax
+                $.ajax({
+                                    url: "/telegramBot/send-chat/"+account_id_value,
+                                    type: "POST",
+                                    data: { group_name: group_name_value,account_id:account_id_value,message:message,delay:delay, datetime:datetime, type:type ,csrfmiddlewaretoken: "{{ csrf_token }}" },
+                                    success: function (response) {
+                                      respone_div = document.getElementById("response"+i);
+                                      response_btn = document.getElementById("response-btn"+i);
+                                      if( response !== 'Scheduled' ) {
+                                              error = response;
+                                            response_btn.className = "btn btn-danger";
+                                            response_btn.innerText = error;
+                                    } else {
+                                            response_btn.className = "btn btn-success";
+                                            response_btn.innerText = response;
+                                    }
+                                      respone_div.style.display = "block";
+                                      
+                                      console.log(response)
+                                    },
+                                error: function (error) {
+                                  respone_div = document.getElementById("response"+i);
+                                  response_btn = document.getElementById("response-btn"+i);
+                                  // response_btn.classList.add("btn-danger");
+                                  response_btn.className = "btn btn-danger";
+                                  response_btn.innerText = error;
+                                  respone_div.style.display = "block";
+                                  
+                                  console.log(error)
+                                },
+                              }).done(function (response) {
+                                console.log(response);
+                              });
+                  }
+                  else if (z == "image"){
+                    
+                    var type = "image";
+                    var formData = new FormData();
+                    formData.append('image', $('#image'+i).prop('files')[0]);
+                    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                    formData.append('group_name', group_name_value);
+                    formData.append('account_id', account_id_value);
+                    formData.append('delay', delay);
+                    formData.append('datetime', datetime);
+                    formData.append('type', type);
+                    console.log(formData)
+                    $.ajax({
+                        type: 'POST',
+                        url: "/telegramBot/send-chat/"+account_id_value,
+                        data: formData,
+                        contentType: 'multipart/form-data',
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        success: function (response) {
+                                      respone_div = document.getElementById("response"+i);
+                                      response_btn = document.getElementById("response-btn"+i);
+                                      if( response !== 'Scheduled' ) {
+                                              error = response;
+                                            response_btn.className = "btn btn-danger";
+                                            response_btn.innerText = error;
+                                    } else {
+                                            response_btn.className = "btn btn-success";
+                                            response_btn.innerText = response;
+                                    }
+                                      respone_div.style.display = "block";
+                                      
+                                      console.log(response)
+                                    },
+                                error: function (error) {
+                                  respone_div = document.getElementById("response"+i);
+                                  response_btn = document.getElementById("response-btn"+i);
+                                  // response_btn.classList.add("btn-danger");
+                                  response_btn.className = "btn btn-danger";
+                                  response_btn.innerText = error;
+                                  respone_div.style.display = "block";
+                                  
+                                  console.log(error)
+                                },
+                              }).done(function (response) {
+                                console.log(response);
+                    });
+                                  
+                
+              }
+              else if (z == "both"){
+                    message = document.getElementById("chat"+i).value;
+                    
+                    var type = "both";
+                    var formData = new FormData();
+                    formData.append('image', $('#image'+i).prop('files')[0]);;
+                    formData.append('message', message);
+                    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                    formData.append('group_name', group_name_value);
+                    formData.append('account_id', account_id_value);
+                    formData.append('delay', delay);
+                    formData.append('datetime', datetime);
+                    formData.append('type', type);
+                    console.log(formData)
+                    $.ajax({
+                        type: 'POST',
+                        url: "/telegramBot/send-chat/"+account_id_value,
+                        data: formData,
+                        contentType: 'multipart/form-data',
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        success: function (response) {
+                                      respone_div = document.getElementById("response"+i);
+                                      response_btn = document.getElementById("response-btn"+i);
+                                      if( response !== 'Scheduled' ) {
+                                              error = response;
+                                            response_btn.className = "btn btn-danger";
+                                            response_btn.innerText = error;
+                                    } else {
+                                            response_btn.className = "btn btn-success";
+                                            response_btn.innerText = response;
+                                    }
+                                      respone_div.style.display = "block";
+                                      
+                                      console.log(response)
+                                    },
+                                error: function (error) {
+                                  respone_div = document.getElementById("response"+i);
+                                  response_btn = document.getElementById("response-btn"+i);
+                                  // response_btn.classList.add("btn-danger");
+                                  response_btn.className = "btn btn-danger";
+                                  response_btn.innerText = error;
+                                  respone_div.style.display = "block";
+                                  
+                                  console.log(error)
+                                },
+                              }).done(function (response) {
+                                console.log(response);
+                    });
+                                  
+                
+              }}
+        else{
+          console.log("something missing");
+            
+          response_btn = document.getElementById("response-btn"+i);
+          response_btn.className = "btn btn-danger";
+          response_btn.innerText = "404";
+          response_btn.style.display = "block";
+        }
+  
+  
+        
+      }       
+      // -x-x-x-x-x-x-x-x-
+
+    function addmore(i){
+        if (i > 40 ) {
+          console.log("max limit reached");
+        }
+        else{
+          j = i+1;
+          jQuery('#table-body').append(
+          // document.getElementById("table-body").innerHTML +=
+            `<tr id="row_`+i+`">
+              <th scope="row">`+i+`</th>
+              <td style="width: 8%;"><select onchange="changeFunc(i=`+i+`);" id="type`+i+`" type="text" class="form-control" name="type" aria-describedby="emailHelp" required>
+                <option  value="text">Text</option>
+                <option value="image">Image</option>
+                <option value="both">Text + Image</option>
+            </select></td>
+              <td><div id="chatdiv`+i+`"><input type="text" class="form-control" name="chat" id="chat`+i+`" aria-describedby="emailHelp"></div></td>
+            <td><div id="imagediv`+i+`"></div></td>
+              <td><select id="account`+i+`" type="text" class="form-control" name="account" aria-describedby="emailHelp" placeholder="Select account" required>
+                {% for i in accounts %}
+                <option value="{{i.id}}">{{i.number}}</option>
+                {% endfor %}
+            </select></td>
+              <td><select id="group_name`+i+`" type="text" class="form-control" name="group_name" aria-describedby="emailHelp" placeholder="Enter Group Name" required>
+                {% for i in groups %}
+                <option value="{{i.group_name}}">{{i.group_name}}</option>
+                {% endfor %}
+            </select></td>
+            <td style="width: 15%;"><select id="delay`+i+`" type="number" class="form-control w-50" name="sleep_time_first" aria-describedby="emailHelp"  required>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="1000">1000</option>
+              <option value="5000">5000</option>
+              <option value="10000">10000</option>
+              <option value="20000">20000</option>
+          </select></td>
+          <td><input type="datetime-local" id="birthdaytime`+i+`" class="form-control" name="datetime"></td>
+          <td><button style="display: none;" id="response-btn`+i+`" class=""></button></td>
+              <td><button id="response`+i+`" class="btn btn-dark" onclick="send(i=`+i+`)">Send</button></td>
+          <td><button onclick="deleterow(deleterowid=`+i+`)" id="`+i+`" class="btn btn-danger">x</button></td>
+            </tr>`)
+        document.getElementById("add-more").innerHTML =
+       `<button onclick="addmore(i=`+j+`)" class="btn btn-success btn-sm">+</button></div>`;
+        }}
+              // -x-x-x-x-x-x-x-x-
+    function deleterow(id) {
+        // var id = deleterowid.split("_")[1];
+        console.log(id);
+        // jQuery("#row_" + id.toString() + "").remove();}
+        jQuery("#row_" + id).remove();}
+    
+    function nodelete(){
+        alert("Sorry! You can't remove First Row");
+    }
+
+</script>
+<script>
+   $(document).ready(function() {
+    $('#example1').DataTable({
+      "paging":   false,
+        "ordering": false,
+        "info":     false,
+        "searching": false
+    });
+    
+} );
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

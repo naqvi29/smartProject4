@@ -1,0 +1,47 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+{% endblock %}
+{% block heading %} 
+Users Scrapper
+{% endblock %}
+{% block content %}
+
+<div class="container">
+
+<div class="table-responsive">      
+    <h2 class="text-center">Accounts</h2>
+    <p class="text-center">Select an account to continue</p>
+    <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+        <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Number</th>
+              <th scope="col">Select</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in accounts %}
+            <tr>
+              <th scope="row">{{forloop.counter}}</th>
+              <td>{{i.number}}</td>
+              <td><a href="/telegramBot/users-scrapper-groups/{{i.id}}"><button class="btn btn-dark">Select</button></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+    </table>
+{% endblock %}
+{% block scripts %} 
+<script>
+   $(document).ready(function() {
+    $('#example1').DataTable();
+} );
+</script>
+{% endblock %}

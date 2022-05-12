@@ -1,0 +1,68 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+<style>
+    #example {
+  font-size: 0.8em;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+{% endblock %}
+{% block heading %} 
+User ADD Logs  <a href="/telegramBot/clear-all-user-add-logs"><button onclick="deleteAlert()" class="ml-5 btn-sm btn btn-outline-danger">Clear All Logs</button></a>
+{% endblock %}
+{% block content %}
+<div>
+    <div class="table-responsive">      
+        <table id="example" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+            <thead>
+                <tr>
+                  <th scope="col">Log</th>
+                  <th scope="col">Added In</th>
+                  <th scope="col">Member</th>
+                  <th scope="col">From Account</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in logs %}
+                <tr>
+                  <td>{{i.log}}</td>
+                  <td>{{i.your_group}}</td>
+                  <td>{{i.member_name}}</td>
+                  <td>{{i.account}}</td>
+                  <td>{{i.date}}</td>
+                  <td>{{i.time}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+      </div>
+</div>
+{% endblock %}
+{% block scripts %} 
+<script>
+   $(document).ready(function() {
+    $('#example').DataTable();
+} );
+</script>
+<script>
+    function deleteAlert() {
+      alert("Are you sure you want to delete all logs?");
+    }
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

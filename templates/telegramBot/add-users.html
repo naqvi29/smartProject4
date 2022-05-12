@@ -1,0 +1,373 @@
+{% extends 'telegramBot/user-layout.html' %}
+
+{% block head %}
+<!-- my custom css file  -->
+<link rel="stylesheet" href="/static/telegramBot/css/telegram-dmBot-send.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<!-- multiselect  -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+{% endblock %}
+
+{% block heading %} 
+Telegram Add Users to Group 
+<a href="/telegramBot/schedule-add-users"><button class="ml-2 btn-sm btn btn-outline-dark">Schedule Invites</button></a><a href="/telegramBot/user-add-logs"><button class="ml-2 btn btn-sm btn-outline-dark">USER ADD Logs</button></a>
+{% endblock %}
+
+{% block content %}
+<!-- The add new group modal -->
+<div id="groupModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close1">&times;</span>
+      
+<div class="table-responsive">      
+  <h2 id="modal-heading">Scrapped Members From Selected Group</h2>
+  <div id="api-resp"></div>
+</div>
+    </div>
+  </div>
+
+</div>
+<!-- group modal end -->
+
+
+<div class="table-responsive">   
+  <table id="example1" class="display compact table table-bordered table-striped" style="width: 150%;">
+      <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Your Group</th>
+            <th scope="col">Scraped Groups</th>
+            <th scope="col">Scraped Members</th>
+            <th scope="col">From Accounts</th>
+            <th scope="col">Delay (sec)</th>
+            <th scope="col">Limit/Account</th>
+            <th scope="col">DateTime (GMT+5)</th>
+            <th scope="col">Status</th>
+            <th scope="col">Add</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <th scope="row">1</th>
+            <td><div id="inputType1"><input type="text" class="form-control" name="chat" id="yourgroup1" aria-describedby="emailHelp"></div></td>
+            <td><select id="group_name1" type="text" class="form-control" name="group_name" aria-describedby="emailHelp" placeholder="Enter Group Name" required>
+              {% for i in scraped_groups %}
+              <option value="{{i.id}}">{{i.group_username}}</option>
+              {% endfor %}
+          </select></td>
+            <td><button id="groupBtnss" onclick="api(i=1)" class="btn btn-secondary">Show</button></td>
+            <td><select id="account1" class="selectpicker" multiple data-live-search="true">
+              {% for x in accounts %}
+              <option value="{{x}}">{{x}}</option>
+              {% endfor %}
+            </select>
+              </td>
+          <td style="width: 12%;"><select id="delay1" type="number" class="form-control w-50" name="sleep_time_first" aria-describedby="emailHelp"  required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="1000">1000</option>
+            <option value="5000">5000</option>
+            <option value="10000">10000</option>
+            <option value="20000">20000</option>
+        </select></td>
+        <td style="width: 15%;"><select id="limit1" type="number" class="form-control w-50" aria-describedby="emailHelp"  required>
+            <option>10</option>
+            <option>20</option>
+            <option>30</option>
+            <option>40</option>
+            <option>50</option>
+            <option>60</option>
+            <option>70</option>
+            <option>80</option>
+            <option>90</option>
+            <option>100</option>
+            <option>110</option>
+            <option>120</option>
+            <option>130</option>
+            <option>140</option>
+            <option>150</option>
+            <option>160</option>
+            <option>170</option>
+            <option>180</option>
+            <option>190</option>
+            <option selected>200</option>
+      </select></td>
+        <!-- <td style="width: 5%;"><input max="40" min="1" value="40" type="number" id="limit1" class="form-control"></td> -->
+        <td><input type="datetime-local" id="birthdaytime1" class="form-control" name="datetime"></td>
+        <td><button style="display: none;" id="response-btn1" class=""></button></td>
+            <td><button id="response1" class="btn btn-dark" onclick="send(i=1)">Add</button></td>
+            <td><button  onclick="nodelete()"class="btn btn-danger">x</button></td>
+          </tr>
+        </tbody>
+  </table>
+  <div id="add-more">
+    <button onclick="addmore(i=2)" class="btn btn-success btn-sm">+</button></div>
+</div>
+{% endblock %}
+{% block scripts %} 
+<script>
+  
+  function api(i){
+    console.log("sttt")
+    var modal1 = document.getElementById("groupModal");
+    modal1.style.display = "block";
+    
+    var group_name = document.getElementById("group_name"+i);
+      var group_name_value = group_name.value;
+        $.ajax({
+                      url: "/telegramBot/scrapped-members-api",
+                      type: "POST",
+                      data: { group_id: group_name_value ,csrfmiddlewaretoken: "{{ csrf_token }}" },
+                      success: function (response) {
+                        var response_div = document.getElementById("api-resp");
+                        
+                        if (response == "[]"){
+                          response_div.innerText = "No Members for this Group"; 
+                        }
+                        else{
+                          response_div.innerText=response;
+                        }
+                      },
+                  error: function (error) {
+                    respone_div = document.getElementById("response"+i);
+                    response_btn = document.getElementById("response-btn"+i);
+                    // response_btn.classList.add("btn-danger");
+                    response_btn.className = "btn btn-danger";
+                    response_btn.innerText = error;
+                    respone_div.style.display = "block";
+                    
+                    console.log(error)
+                  },
+                }).done(function (response) {
+                  console.log(response);
+                }); 
+  }
+</script>
+
+<script>
+
+    // Get the modal
+    var modal1 = document.getElementById("groupModal");
+    // Get the button that opens the modal
+    // var btn1 = document.getElementById("groupBtn");
+    // Get the <span> element that closes the modal
+    var span1 = document.getElementsByClassName("close1")[0];
+    // When the user clicks on the button, open the modal
+    // btn1.onclick = function() {
+    //     modal1.style.display = "block";
+    // }
+    // When the user clicks on <span> (x), close the modal
+    span1.onclick = function() {
+        modal1.style.display = "none";
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal1) {
+        modal1.style.display = "none";
+        }
+    }
+    // -x-x-x-x-x-x-x-x-
+
+    function changeFunc(i){
+        var z = document.getElementById("type"+i);
+        var z = z.value;
+        var td = document.getElementById("inputType"+i);
+        console.log(td)
+        if (z == "text"){
+          td.innerHTML = `<input type="text" class="form-control" name="chat" id="chat`+i+`" aria-describedby="emailHelp">`;
+        }
+        else{
+          td.innerHTML = `<form class="form-control" enctype="multipart/form-data" id="fileform">{%csrf_token%}<input style="width: 100%;" class="form-group" type="file" name="image" id="chat`+i+`" aria-describedby="emailHelp"></form>`;
+  
+        }
+      }
+       // -x-x-x-x-x-x-x-x-
+
+    function send(i){
+      
+      
+        // respone_div = document.getElementById("response");
+        response_btn = document.getElementById("response-btn"+i);
+        response_btn.className = "btn btn-lg btn-secondary";
+        response_btn.innerText = "Running";
+        response_btn.style.display = "block";
+  
+        your_group = document.getElementById("yourgroup"+i).value;
+        var group_name = document.getElementById("group_name"+i);
+        var group_name_value = group_name.value;
+        delay = document.getElementById("delay"+i).value;
+        datetime = document.getElementById("birthdaytime"+i).value;
+        limit_per_account = document.getElementById("limit"+i).value;
+        var accounts = $('#account'+i).val();
+        var accounts = JSON.stringify(accounts);
+        console.log(your_group);
+        console.log(group_name_value);
+        console.log(delay);
+        console.log(datetime);
+        console.log(limit_per_account);
+        console.log(accounts);
+        if (your_group && datetime && group_name_value && delay && accounts  ) {
+          console.log("all recieved");
+          $.ajax({
+                url: "/telegramBot/add-users-function",
+                type: "POST",
+                data: { group_name: group_name_value,your_group:your_group,delay:delay, datetime:datetime,limit_per_account:limit_per_account,accounts:accounts,csrfmiddlewaretoken: "{{ csrf_token }}" },
+                success: function (response) {
+                    respone_div = document.getElementById("response"+i);
+                    response_btn = document.getElementById("response-btn"+i);
+                    if( response !== 'Scheduled' ) {
+                            error = response;
+                        response_btn.className = "btn btn-danger";
+                        response_btn.innerText = error;
+                } else {
+                        response_btn.className = "btn btn-success";
+                        response_btn.innerText = response;
+                }
+                    respone_div.style.display = "block";
+                    
+                    console.log(response)
+                },
+            error: function (error) {
+                respone_div = document.getElementById("response"+i);
+                response_btn = document.getElementById("response-btn"+i);
+                // response_btn.classList.add("btn-danger");
+                response_btn.className = "btn btn-danger";
+                response_btn.innerText = error;
+                respone_div.style.display = "block";
+                
+                console.log(error)
+            },
+            }).done(function (response) {
+            console.log(response);
+            }); 
+              }
+        else{
+          console.log("something missing");
+          response_btn = document.getElementById("response-btn"+i);
+          response_btn.className = "btn btn-danger";
+          response_btn.innerText = "404";
+          response_btn.style.display = "block";
+        }}       
+      // -x-x-x-x-x-x-x-x-
+
+    function addmore(i){
+        if (i > 40 ) {
+          console.log("max limit reached");
+        }
+        else{
+          j = i+1;
+          jQuery('#table-body').append(
+          // document.getElementById("table-body").innerHTML +=
+            `<tr id="row_`+i+`">
+              <th scope="row">`+i+`</th>
+              <td><div id="inputType`+i+`"><input type="text" class="form-control" name="chat" id="yourgroup`+i+`" aria-describedby="emailHelp"></div></td>
+              <td><select id="group_name`+i+`" type="text" class="form-control" name="group_name" aria-describedby="emailHelp" placeholder="Enter Group Name" required>
+                {% for i in scraped_groups %}
+              <option value="{{i.id}}">{{i.group_username}}</option>
+              {% endfor %}
+            </select></td>
+            <td><button id="groupBtnss" onclick="api(i=`+i+`)" class="btn btn-secondary">Show</button></td>
+            <td><select id="account`+i+`" class="selectpicker" multiple data-live-search="true">
+             {% for x in accounts %} 
+                <option value="{{x}}">{{x}}</option> 
+             {% endfor %}
+            </select>
+              </td>
+            <td style="width: 12%;"><select id="delay`+i+`" type="number" class="form-control w-50" name="sleep_time_first" aria-describedby="emailHelp"  required>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="1000">1000</option>
+              <option value="5000">5000</option>
+              <option value="10000">10000</option>
+              <option value="20000">20000</option>
+          </select></td>
+          <td style="width: 15%;"><select id="limit`+i+`" type="number" class="form-control w-50" aria-describedby="emailHelp"  required>
+            <option>10</option>
+            <option>20</option>
+            <option>30</option>
+            <option>40</option>
+            <option>50</option>
+            <option>60</option>
+            <option>70</option>
+            <option>80</option>
+            <option>90</option>
+            <option>100</option>
+            <option>110</option>
+            <option>120</option>
+            <option>130</option>
+            <option>140</option>
+            <option>150</option>
+            <option>160</option>
+            <option>170</option>
+            <option>180</option>
+            <option>190</option>
+            <option selected>200</option>
+      </select></td>
+          <td><input type="datetime-local" id="birthdaytime`+i+`" class="form-control" name="datetime"></td>
+          <td><button style="display: none;" id="response-btn`+i+`" class=""></button></td>
+              <td><button id="response`+i+`" class="btn btn-dark" onclick="send(i=`+i+`)">Add</button></td>
+          <td><button onclick="deleterow(deleterowid=`+i+`)" id="`+i+`" class="btn btn-danger">x</button></td>
+            </tr>`)
+        document.getElementById("add-more").innerHTML =
+       `<button onclick="addmore(i=`+j+`)" class="btn btn-success btn-sm">+</button></div>`;
+       
+       $('#account'+i).selectpicker();
+        }}
+              // -x-x-x-x-x-x-x-x-
+    function deleterow(id) {
+        // var id = deleterowid.split("_")[1];
+        console.log(id);
+        // jQuery("#row_" + id.toString() + "").remove();}
+        jQuery("#row_" + id).remove();}
+    
+    function nodelete(){
+        alert("Sorry! You can't remove First Row");
+    }
+
+</script>
+<script>
+   $(document).ready(function() {
+    $('#example1').DataTable({
+      "paging":   false,
+        "ordering": false,
+        "info":     false,
+        "searching": false
+    });
+    
+} );
+</script>
+<script>
+  $('account1').selectpicker();
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

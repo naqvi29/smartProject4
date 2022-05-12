@@ -1,0 +1,103 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  margin: auto;
+  animation: spin 2s linear infinite;
+  border-top: 16px solid blue;
+  border-right: 16px solid green;
+  border-bottom: 16px solid red;
+  border-left: 16px solid pink;
+}
+#loader{
+  
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+{% block heading %} 
+Users Scrapper
+{% endblock %}
+{% block content %}
+{% if results %}
+<div class="container">
+  {% if results == "0" %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>No</strong>  new groups found!
+    {% else %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>{{results}}</strong>  new groups scrapped!
+    {% endif %}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  {% endif %}
+
+<div class="table-responsive">      
+    <h2 class="text-center">Groups</h2>
+    <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+        <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Group ID</th>
+              <th scope="col">Group Title</th>
+              <th scope="col">Group Username</th>
+              <th scope="col">Select</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in telegram_scrapped_groups %}
+            <tr>
+              <th scope="row">{{forloop.counter}}</th>
+              <td>{{i.group_id}}</td>
+              <td>{{i.group_title}}</td>
+              <td>{{i.group_username}}</td>
+              <td><a href="/telegramBot/users-scrapper-group-members/{{account_id}}/{{i.id}}"><button class="btn btn-dark">Select</button></a></td>
+              <td><a href="/telegramBot/delete-scrapped-group/{{account_id}}/{{i.id}}"><button onclick="deleteAlert()" type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+    </table>
+</div>
+    <form action="/telegramBot/users-scrapper-groups/{{account_id}}" class="text-center mb-4 mt-2" method="post">
+        {% csrf_token %}
+        <input type="text" hidden>
+        <button id="loaderbtn" type="submit" class="btn btn-outline-success ">Scrap/Update Groups</button>
+    </form>
+</div>
+  <div id="loader" class="loader"></div>
+{% endblock %}
+{% block scripts %} 
+<script>
+  function myScript(){
+   console.log("cliccked");
+   var x = document.getElementById("loader");
+    x.style.display = 'block';
+  }
+ document.getElementById("loaderbtn").addEventListener("click", myScript);
+ 
+</script>
+<script>
+   $(document).ready(function() {
+    $('#example1').DataTable();
+} );
+</script>
+{% endblock %}

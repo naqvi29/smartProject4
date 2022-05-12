@@ -1,0 +1,125 @@
+{% extends 'scrapper/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+{% block heading %} 
+Scrapper
+{% endblock %}
+{% block content %}
+<form action="/scrapper/scrapper-bot" method="post">
+  {% csrf_token %}
+    <div class="form-group">
+      <label for="exampleInputEmail1">URL:</label>
+      <input id="link1" type="text" class="form-control" id="exampleInputEmail1" name="link1" aria-describedby="emailHelp" placeholder="Enter URL">
+    </div>
+    <div class="container1"></div>
+    <button type="button" class="btn btn-secondary add_form_field">Add another URL</button>
+    <a onclick="groot()" class="btn btn-primary run">RUN</a>
+    <!-- <div id="loader" class="loader mt-2" style="display: none;"></div> -->
+    <div id="console-log" class="mt-2">
+      
+    </div>
+  </form>
+{% endblock %}
+{% block scripts %} 
+<script>
+    $(document).ready(function() {
+    var max_fields = 10;
+    var wrapper = $(".container1");
+    var add_button = $(".add_form_field");
+
+    var x = 1;
+    $(add_button).click(function(e) {
+        e.preventDefault();
+        if (x < max_fields) {
+            x++;
+            $(wrapper).append(`<div class="form-group">
+      <input id="link${x}" type="text" class="form-control" id="exampleInputEmail1" name="link${x}" aria-describedby="emailHelp" placeholder="Enter URL">
+      <a href="#" class="delete btn btn-outline-secondary btn-sm">close</a></div></div>`); //add input box
+        } else {
+            alert('You Reached the limits')
+        }
+    });
+
+    $(wrapper).on("click", ".delete", function(e) {
+        e.preventDefault();
+        $(this).parent('div').remove();
+        x--;
+    })
+});
+</script>
+<script>
+  // new 
+  function groot(i) {
+      for (i = 1; i < 11; i++) {
+          console.log("i:",i)
+        links=[]
+        var link = document.getElementById("link"+i+"").value;
+        var number = i;
+        links.push(link);
+        links.push(number);
+        
+        console.log("links is:",links)
+        
+        var json_string = JSON.stringify(links)
+        if (link){
+          
+        document.getElementById("console-log").innerHTML +=
+          "<a id='status-btn"+i+"' class='status-btn btn btn-warning run'>URL"+i+" RUNNING..</a><p>url"+i+" started</p>";
+            // var link1 = link1.value;
+        console.log("link",link);
+        
+        var funcs = [];
+        $.ajax({
+          url: "/scrapper/scrapper-bot",
+          type: "POST",
+          data: { link: json_string, csrfmiddlewaretoken: "{{ csrf_token }}" },
+          success: function (data) {
+            
+            console.log("i in ajax:", i )
+            console.log(data);
+            var data2 = "<p>url" + data + " Completed..!</p>";
+            document.getElementById("console-log").innerHTML += data2;
+
+            document.getElementById("status-btn"+data).innerHTML = "FINISHED..";
+            document.getElementById("status-btn"+data).classList.remove("btn-warning");
+            document.getElementById("status-btn"+data).classList.add("btn-success");
+          },
+        }).done(function (data) {
+          console, log("done");
+        });
+        }
+        
+      }
+    }
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

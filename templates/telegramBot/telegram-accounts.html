@@ -1,0 +1,265 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+</style>
+{% endblock %}
+{% block heading %} 
+Telegram DM BOT
+{% endblock %}
+{% block content %}
+<div class="container my-2">
+  <div>
+    {% comment %} <form action="/telegramBot/telegram-accounts" method="post"  enctype="multipart/form-data"> {% endcomment %}
+    {% comment %} {% csrf_token %} {% endcomment %}
+        <!-- <div class="form-group">
+          <label for="exampleInputEmail1">Hash ID:</label>
+          <input id="link1" type="text" class="form-control" id="exampleInputEmail1" name="hash_id" aria-describedby="emailHelp" placeholder="Enter Hash ID" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Hash Key:</label>
+          <input id="link1" type="text" class="form-control" id="exampleInputEmail1" name="hash_key" aria-describedby="emailHelp" placeholder="Enter Hash Key" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Telegram Number:</label>
+          <input id="link1" type="number" class="form-control" id="exampleInputEmail1" name="number" aria-describedby="emailHelp" placeholder="92xxxxxxxxxxx" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Session File:</label>
+          <input id="link1" type="file" class="form-control" id="exampleInputEmail1" name="session_file" aria-describedby="emailHelp" placeholder="Session File">
+        </div>
+        <button type="submit" class="btn btn-primary">Start Session</button>
+        </div>
+        
+        </div> -->
+
+        <div class="form-group">
+          <label for="exampleInputEmail1">Hash ID:</label>
+          <input id="hash_id" type="text" class="form-control" id="exampleInputEmail1" name="hash_id" aria-describedby="emailHelp" placeholder="Enter Hash ID" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Hash Key:</label>
+          <input id="hash_key" type="text" class="form-control" id="exampleInputEmail1" name="hash_key" aria-describedby="emailHelp" placeholder="Enter Hash Key" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Telegram Number:</label>
+          <input id="number" type="text" class="form-control" id="exampleInputEmail1" name="number" aria-describedby="emailHelp" placeholder="+92xxxxxxxxxxx" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Proxy:</label>
+          <input id="proxy" type="text" class="form-control" id="exampleInputEmail1" name="proxy" aria-describedby="emailHelp" placeholder="username:password@host:port">
+        </div>
+        <button type="submit" onclick="add_new_account()" class="btn btn-primary">Add Account</button>
+    {% comment %} </form> {% endcomment %}
+    </div>
+</div>
+<div class="table-responsive">      
+    <h2>Telegram Accounts</h2>
+    <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+        <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Hash Key</th>
+              <th scope="col">Hash ID</th>
+              <th scope="col">Number</th>
+              <th scope="col">Verified</th>
+              <!-- <th scope="col">Telegram DM Bot</th> -->
+              <th scope="col">Edit</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in telegram_accounts %}
+            <tr>
+              <th scope="row">{{forloop.counter}}</th>
+              <td>{{i.hash_key}}</td>
+              <td>{{i.hash_id}}</td>
+              <td>{{i.number}}</td>
+              <td><button class="btn btn-success btn-sm">Verified</button></td>
+              <!-- {% if i.session_file %}
+              <td><button class="btn btn-success btn-sm">Verified</button></td>
+              {% else %}
+              <td><button class="btn btn-danger btn-sm">Not Verified</button></td>
+              {% endif %} -->
+              <!-- <td><a href="/telegramBot/telegram-dmBot-send"><button type="button" class="btn btn-outline-dark btn-sm">Open DM Bot</button></a></td> -->
+              <td><a href="/telegramBot/edit-telegram-account/{{i.id}}"><button type="button" class="btn btn-outline-primary btn-sm">Edit</button></a></td>
+              <td><a onclick="deleteAlert()" href="delete-telegram-account/{{i.id}}"><button onclick="deleteAlert()" type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+            </tr>
+            {% endfor %} 
+          </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block scripts %} 
+<script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+<script>
+  currentTeleAccount = {}
+
+  var pusher = new Pusher('c33307f9b5c57158f0e6', {
+      cluster: 'us2',
+      encrypted: true
+  });
+
+  var my_channel = 'telegramAccountAuthenticator-{{username}}'
+  console.log(my_channel)
+  var channel = pusher.subscribe(my_channel);
+
+  channel.bind('onCodeReceived', function(data,metadata) {
+    console.log("*******")
+    console.log(data)
+    console.log(metadata)
+    console.log("-------")
+    console.log(currentTeleAccount)
+
+    var phone_number = currentTeleAccount.number
+    var api_hash = currentTeleAccount.hash_key
+    var api_id = currentTeleAccount.hash_id
+    var proxy = currentTeleAccount.proxy
+
+    Swal.close()
+    Swal.fire({
+        title: "Enter verification code",
+        html: `
+            <br>
+            <div>
+                <input id='veri_code' class='form-control' style='width"90%;margin: 0 auto;text-align:center' placeholder='Put code here' />
+            </div>
+            <br>
+        `,
+        showConfirmButton:true,
+        confirmButtonText: 'Submit !',
+        showCancelButton: true,
+        cancelButtonText: 'Abort.',
+        allowOutsideClick: false
+    }).then((result)=>{
+        if(result.value){
+            code = document.getElementById("veri_code").value
+            if(!Boolean(code)){
+                Swal.fire({
+                    title: "code is not provided :(",
+                    icon: "error"
+                })
+            }else{
+                Swal.fire({
+                    title: "finalizing...",
+                    onOpen:()=>{
+                        Swal.clickConfirm()
+                    },
+                    allowOutsideClick: false,
+                    showLoaderOnConfirm: true,
+                    preConfirm: ()=>{
+                        return new Promise((resovle)=>{
+                            let csrftoken = '{{ csrf_token }}'
+                            $.ajax({
+                                type: "POST",
+                                headers: {'X-CSRFToken':csrftoken},
+                                url: "{{ '/telegramBot/authenticate_telegram_account_code' }}",
+                                data: {
+                                    'code':code
+                                },
+                                success: function callback(response){
+                                    console.log('inside code auth')
+                                    console.log(response)
+                                    resovle(response)
+                                }
+                            })
+                        })
+                    }
+                }).then((res)=>{
+                    console.log('after inside code auth')
+                    console.log(res.value)
+                    if(res.value.status == 'pass'){
+                        Swal.fire({
+                            text: res.value.msg,
+                            icon: 'success'
+                        }).then(()=>{
+                            location.reload()
+                        });
+                    }else{
+                        Swal.fire({
+                            text: res.value.msg,
+                            icon: 'error'
+                        })
+                    }
+                })
+            }
+        }
+    })
+
+});
+
+
+  function deleteAlert() {
+    alert("Are you sure you want to clear all scrapped members from this group?");
+  }
+
+  function add_new_account(){
+    currentTeleAccount.number = document.getElementById('number').value
+    currentTeleAccount.hash_id = document.getElementById('hash_id').value
+    currentTeleAccount.hash_key = document.getElementById('hash_key').value
+    currentTeleAccount.proxy = document.getElementById('proxy').value
+    if(!Boolean(currentTeleAccount.number) || !Boolean(currentTeleAccount.hash_id) || !Boolean(currentTeleAccount.hash_key)){
+      Swal.fire({
+          title:'',
+          icon: 'error',
+          text: 'input are missing :('
+      })
+    }else{
+      Swal.fire({
+          title: 'Authenticating Telegram Account',
+          onOpen:()=>{
+              Swal.clickConfirm()
+          },
+          allowOutsideClick: false,
+          showLoaderOnConfirm: true,
+          preConfirm: ()=>{
+              return new Promise((resovle)=>{
+                  let csrftoken = '{{ csrf_token }}'
+                  $.ajax({
+                      type: "POST",
+                      headers: {'X-CSRFToken':csrftoken},
+                      url: "{{ '/telegramBot/authenticate_telegram_account' }}",
+                      data: {
+                          'number':currentTeleAccount.number,
+                          "hash_id":currentTeleAccount.hash_id,
+                          "hash_key":currentTeleAccount.hash_key,
+                          'proxy':currentTeleAccount.proxy,
+                          'username': "{{username}}"
+                      },
+                      success: function callback(response){
+                        console.log(response)
+                          resovle(response)
+                      }
+                  })
+              })
+          }
+      }).then((response)=>{
+          if(response.value){
+              Swal.fire({
+                  text: response.value.msg,
+                  icon: response.value.status == 'pass' ? 'success' : 'error'
+              }).then(()=>{
+                  location.href = "/telegramBot/telegram-user-dmBot-send"
+              })
+          }
+      })
+    }
+  }
+
+
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
